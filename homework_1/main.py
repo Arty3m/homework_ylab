@@ -1,6 +1,7 @@
 import itertools
 import re
 from ipaddress import IPv4Address
+import math
 
 
 def domain_name(url):
@@ -65,24 +66,20 @@ assert bananas("bananana") == {"ban--ana", "ba--nana", "bana--na", "b--anana", "
 
 
 def count_find_num(primesL, limit):
-    res = []
-    for el in range(1, limit + 1):
-        used = []
-        tmp_el = el
-        tmp_primes = primesL.copy()
-        while tmp_primes:
-            if tmp_el % tmp_primes[0] == 0:
-                tmp_el /= tmp_primes[0]
-                used.append(tmp_primes[0])
-            elif len(tmp_primes) != 0:
-                tmp_primes.pop(0)
-        else:
-            if tmp_el == 1 and len(set(used)) == len(primesL) and not tmp_primes:
-                res.append(el)
-    if res:
-        return [len(res), max(res)]
-    else:
-        return []
+    result = []
+    powers = []
+    for prime in primesL:
+        max_pwr = math.floor(math.log(limit, prime))
+        powers.append(range(1, max_pwr + 1))
+
+    for item in itertools.product(*powers):
+        num = 1
+        for i, el in enumerate(item):
+            num *= pow(primesL[i], el)
+        if num <= limit and num not in result:
+            result.append(num)
+
+    return [len(result), max(result)] if result else []
 
 
 primesL = [2, 5, 7]
@@ -108,3 +105,7 @@ assert count_find_num(primesL, limit) == [19, 960]
 primesL = [2, 3, 47]
 limit = 200
 assert count_find_num(primesL, limit) == []
+
+primesL = [29, 47, 89]
+limit = 7541898
+assert count_find_num(primesL, limit) == [3, 5701429]
