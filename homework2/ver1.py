@@ -44,6 +44,3 @@ if __name__ == '__main__':
     points = [(0, 2), (2, 5), (5, 2), (6, 6), (8, 3)]
     # points = [(0, 1), (1, 4), (4, 1), (5, 5), (7, 2)]
     get_shortest_route(points)
-
-    # print(points[1])
-    print(distance(points[4], points[3]))
