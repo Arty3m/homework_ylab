@@ -2,11 +2,13 @@ import itertools
 import math
 
 
-def distance(point_1, point_2):
+def distance(point_1: int, point_2: int) -> float:
+    """Вычисляет расстояние между двумя точками"""
     return math.sqrt((point_2[0] - point_1[0]) ** 2 + (point_2[1] - point_1[1]) ** 2)
 
 
-def print_result(r):
+def print_result(r: list) -> None:
+    """Выводит конечный ответ"""
     value = r[0]
     tup = r[1]
     for i in range(0, len(tup), 2):
@@ -18,7 +20,8 @@ def print_result(r):
             print(f'{tup[i]}[{tup[i + 1]}] -> ', end='')
 
 
-def get_shortest_route(locations):
+def get_shortest_route(locations: list[tuple]) -> None:
+    """Находит кратчайший путь"""
     start_point = locations[0]
 
     permutations = []
