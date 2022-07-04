@@ -37,7 +37,7 @@ def second_min(adj_matrix: list[list], i: int) -> float:
     return second
 
 
-def TSPRec(matrix: list[list], n: int, curr_bound: float, curr_weight: float, level: int, curr_path: list,
+def TSPRec(matrix: list, n: int, curr_bound: float, curr_weight: float, level: int, curr_path: list,
            visited: list):
     """Находит наименьшую стоимость маршрута"""
     global final_cost
@@ -78,7 +78,7 @@ def TSPRec(matrix: list[list], n: int, curr_bound: float, curr_weight: float, le
                     visited[curr_path[j]] = True
 
 
-def TSP(matrix: list[list], n: int) -> None:
+def TSP(matrix: list, n: int) -> None:
     curr_bound = 0
     curr_path = [-1] * (n + 1)
     visited = [False] * n
