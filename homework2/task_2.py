@@ -33,7 +33,7 @@ def draw_cell(x: int, y: int, move: int) -> None:
 
 def player_turn(board: np.ndarray, symbol: str, move_count: int, avail_cells: list[int]) -> tuple[int, tuple]:
     """Выполняет ход игрока"""
-    row, col = human_select() if symbol == HUMAN_SYMBOL else bot_select()
+    row, col = human_select() if symbol == HUMAN_SYMBOL else bot_select(board, avail_cells)
     if board[row, col] not in VARIANTS_MOVE:
         board[row, col] = symbol
         avail_cells.remove(row * 10 + col)
@@ -50,10 +50,19 @@ def human_select() -> tuple[int, int]:
     return y_pos // (CELL_SIZE + GAP), x_pos // (CELL_SIZE + GAP)
 
 
-def bot_select() -> tuple[int, int]:
+def bot_select(board, avail_cells) -> tuple[int, int]:
     """Рандомно выбирает свободную клетку и возвращает номер ее строки и столбца"""
     sleep(0.4)
-    return get_row_col(random.choice(available_cells))
+    row, col = get_row_col(random.choice(avail_cells))
+    tmp = board.copy()
+    tmp[row][col] = BOT_SYMBOL
+    if not game_over(tmp, BOT_SYMBOL, row, col)[0]:
+        return row, col
+    else:
+        if len(avail_cells) == 1:
+            return get_row_col(avail_cells[0])
+        r, c = bot_select(board, avail_cells)
+        return r, c
 
 
 def get_row_col(num: int) -> tuple[int, int]:
