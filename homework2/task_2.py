@@ -2,6 +2,7 @@ import pygame
 import random
 import numpy as np
 from time import sleep
+import sys
 
 
 def draw_board(board: np.ndarray) -> None:
@@ -120,7 +121,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
             result_screen(game_info[1], timeout=0.7)
-            exit()
+            sys.exit()
 
         if event.type == pygame.MOUSEBUTTONDOWN and move_symbol == HUMAN_SYMBOL:
             move_counter, game_info = player_turn(game_board, move_symbol, move_counter, available_cells)
@@ -135,4 +136,4 @@ else:
     draw_board(game_board)
     pygame.display.update()
     result_screen(game_info[1])
-    pygame.quit()
+    sys.exit()
