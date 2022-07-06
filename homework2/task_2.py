@@ -52,6 +52,7 @@ def human_select() -> tuple[int, int]:
 
 def bot_select(board, avail_cells) -> tuple[int, int]:
     """Рандомно выбирает свободную клетку и возвращает номер ее строки и столбца"""
+    global p
     sleep(0.4)
     row, col = get_row_col(random.choice(avail_cells))
     tmp = board.copy()
@@ -59,10 +60,22 @@ def bot_select(board, avail_cells) -> tuple[int, int]:
     if not game_over(tmp, BOT_SYMBOL, row, col)[0]:
         return row, col
     else:
+        print(row, col)
+        print('rerol')
+
         if len(avail_cells) == 1:
             return get_row_col(avail_cells[0])
+
+        p = p + 1
+        if p > len(avail_cells):
+            return row, col
+
         r, c = bot_select(board, avail_cells)
+        p = 0
         return r, c
+
+
+p = 0
 
 
 def get_row_col(num: int) -> tuple[int, int]:
