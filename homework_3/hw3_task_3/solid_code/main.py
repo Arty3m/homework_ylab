@@ -1,10 +1,10 @@
 from typing import Union
 from heroes import Superman, ChackNorris, SuperHero
-from places import Kostroma, Tokyo
+from places import Kostroma, Tokyo, Place
 
 
 class MassMedia:
-    def create_news(self, name: str, place, source: str):
+    def create_news(self, name: str, place: Place, source: str):
         place_name = getattr(place, 'name', place)
         print(f'{source}: {name} saved the {place_name}!')
 
