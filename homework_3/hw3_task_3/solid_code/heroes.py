@@ -2,8 +2,8 @@ from abc import abstractmethod
 from antagonistfinder import AntagonistFinder
 
 
-class MeleeAttack:
-    def melee_attack(self):
+class BaseAttack:
+    def attack(self):
         print('PUNCH')
 
 
@@ -18,7 +18,7 @@ class UltimateAttack:
         pass
 
 
-class SuperHero(MeleeAttack):
+class SuperHero(BaseAttack):
 
     def __init__(self, name, can_use_ultimate_attack=True):
         self.name = name
@@ -27,9 +27,6 @@ class SuperHero(MeleeAttack):
 
     def find(self, place):
         self.finder.get_antagonist(place)
-
-    def attack(self):
-        self.melee_attack()
 
 
 class Superman(UltimateAttack, SuperHero):
