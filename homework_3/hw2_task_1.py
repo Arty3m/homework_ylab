@@ -18,7 +18,7 @@ class Range2:
 
 class CyclicIterator:
     def __init__(self, iterable_obj):
-        self._collection = cycle(iter(iterable_obj))
+        self._collection = cycle(iterable_obj)
 
     def __iter__(self):
         return self
@@ -29,12 +29,12 @@ class CyclicIterator:
 
 if __name__ == '__main__':
 
-    cyclic_iterator = CyclicIterator(range(3))
+    # cyclic_iterator = CyclicIterator(range(3))
     # cyclic_iterator = CyclicIterator('ssd')
     # cyclic_iterator = CyclicIterator([1, 2, 5, 6, 7])
     # cyclic_iterator = CyclicIterator((3, 5, 8, 7))
     # cyclic_iterator = CyclicIterator({1, 2, 3, 4})
-    # cyclic_iterator = CyclicIterator(Range2(5))
+    cyclic_iterator = CyclicIterator(Range2(5))
 
     for i in cyclic_iterator:
         print(i)
