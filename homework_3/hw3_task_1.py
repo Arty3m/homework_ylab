@@ -3,8 +3,10 @@ import time
 
 
 def cacher(func):
-    def wrapper(num, *args, **kwargs):
-        redis_client = redis.Redis()
+    """Декоратор, который кэширует данные в redis, при повторном запросе возвращает из кэша"""
+
+    def wrapper(num: int, *args, **kwargs):
+        redis_client = redis.Redis('localhost')
         cache = redis_client.get(str(num))
         if cache is not None:
             redis_client.close()
