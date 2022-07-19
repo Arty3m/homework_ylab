@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 import uuid as uuid_pkg
 from sqlmodel import Field, SQLModel
 

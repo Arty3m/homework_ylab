@@ -3,7 +3,6 @@ import uuid as uuid_pkg
 from pydantic import BaseModel
 
 __all__ = (
-    "UserModel",
     "UserCreate",
     "UserBase",
     "UserReqInfo",
@@ -29,11 +28,6 @@ class UserReqInfo(UserBase):
     uuid: uuid_pkg.UUID
 
 
-class UserModel(BaseModel):
-    msg: str
-    user: dict
-
-
 class UserListResponse(BaseModel):
     users: list[UserReqInfo] = []
 
@@ -41,4 +35,3 @@ class UserListResponse(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
-

@@ -29,6 +29,7 @@ class UserService(ServiceMixin):
         return new_user.dict()
 
     def update_user(self, user: UserBase, uuid: str):
+        """Обновить данные пользователя"""
         updated_user: User = self.session.query(User).filter(User.uuid == uuid).first()
         updated_user.username = user.username
         updated_user.email = user.email
@@ -38,17 +39,18 @@ class UserService(ServiceMixin):
         return updated_user.dict()
 
     def login_user(self, user: UserLogin) -> Optional[dict]:
+        """Проверить что введенные пользователем логин пароль совпадают с данными в БД"""
         if (data := self.session.query(User).filter(User.username == user.username).filter(
                 User.password == user.password).first()):
             return data.dict()
         return None
 
     def get_data_by_uuid(self, uuid: str):
+        """Получить данные пользователя по его uuid"""
         data = self.session.query(User).filter(User.uuid == uuid).first()
         return data.dict()
 
 
-# get_post_service — это провайдер UserService. Синглтон
 @lru_cache()
 def get_user_service(
         cache: AbstractCache = Depends(get_cache),

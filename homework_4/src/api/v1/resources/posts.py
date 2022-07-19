@@ -54,7 +54,6 @@ def post_create(post: PostCreate, authorize: AuthJWT = Depends(), post_service: 
         authorize.jwt_required()
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Ivalid token")
-    # возможно стоит добавить в таблицу постов инфу о добавившем юзере
-    # докинуть user_uuid в таблицу
+
     post: dict = post_service.create_post(post=post)
     return PostModel(**post)

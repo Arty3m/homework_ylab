@@ -6,8 +6,6 @@ from src.api.v1.resources import posts, auth
 from src.core import config
 from src.db import cache, redis_cache
 
-
-
 app = FastAPI(
     # Конфигурируем название проекта. Оно будет отображаться в документации
     title=config.PROJECT_NAME,
