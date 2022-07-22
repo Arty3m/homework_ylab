@@ -45,7 +45,7 @@ class UserService(ServiceMixin):
             return data.dict()
         return None
 
-    def get_data_by_uuid(self, uuid: str):
+    def get_data_by_uuid(self, uuid: str) -> dict:
         """Получить данные пользователя по его uuid"""
         data = self.session.query(User).filter(User.uuid == uuid).first()
         return data.dict()

@@ -4,7 +4,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_jwt_auth import AuthJWT
 from src.api.v1.schemas import PostCreate, PostListResponse, PostModel
-from src.services import PostService, get_post_service
+from src.services import PostService, get_post_service, JwtCache
+from src.services import UserService
 
 router = APIRouter()
 
@@ -48,12 +49,14 @@ def post_detail(
     tags=["posts"],
     status_code=201
 )
-def post_create(post: PostCreate, authorize: AuthJWT = Depends(), post_service: PostService = Depends(get_post_service),
+def post_create(post: PostCreate, jwt_cache: JwtCache = Depends(), authorize: AuthJWT = Depends(),
+                post_service: PostService = Depends(get_post_service),
                 ) -> PostModel:
     try:
         authorize.jwt_required()
+        jwt_cache.is_active_access_token(authorize.get_jwt_subject(), authorize.get_raw_jwt()["jti"])
     except Exception as e:
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Ivalid token")
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid token")
 
     post: dict = post_service.create_post(post=post)
     return PostModel(**post)

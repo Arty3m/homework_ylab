@@ -3,9 +3,9 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_jwt_auth import AuthJWT
-
+from fastapi_jwt_auth.exceptions import FreshTokenRequired
 from src.api.v1.schemas import UserBase, UserCreate, UserListResponse, UserReqInfo, UserLogin
-from src.services import UserService, get_user_service
+from src.services import UserService, get_user_service, JwtCache
 from src.core.config import JWT_ALGORITHM
 
 from pydantic import BaseModel
@@ -47,7 +47,7 @@ def signup(user: UserCreate, user_service: UserService = Depends(get_user_servic
     summary="Войти",
     tags=["users"]
 )
-def login(user: UserLogin, authorize: AuthJWT = Depends(),
+def login(user: UserLogin, jwt_cache: JwtCache = Depends(), authorize: AuthJWT = Depends(),
           user_service: UserService = Depends(get_user_service)) -> dict:
     data: dict = user_service.login_user(user=user)
     if not data:
@@ -62,6 +62,7 @@ def login(user: UserLogin, authorize: AuthJWT = Depends(),
     access_token: str = authorize.create_access_token(subject=str(user_data.uuid), user_claims=another_claims,
                                                       expires_time=access_expire_time)
 
+    jwt_cache.add_to_active_refresh(str(user_data.uuid), refresh_uuid)
     return {"access_token": access_token, "refresh_token": refresh_token}
 
 
@@ -77,10 +78,14 @@ def users(user_service: UserService = Depends(get_user_service)) -> UserListResp
     return UserListResponse(**user_list)
 
 
-@router.get(path="/users/me")
-def profile(authorize: AuthJWT = Depends()):
+@router.get(
+    path="/users/me",
+    summary="Посмотреть профиль",
+    tags=["users"])
+def profile(jwt_cache: JwtCache = Depends(), authorize: AuthJWT = Depends()):
     try:
         authorize.jwt_required()
+        jwt_cache.is_active_access_token(authorize.get_jwt_subject(), authorize.get_raw_jwt()["jti"])
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid token")
     current_user: dict = authorize.get_raw_jwt()
@@ -91,13 +96,19 @@ def profile(authorize: AuthJWT = Depends()):
             }
 
 
-@router.patch(path="/users/me")
-def profile(user: UserBase, user_service: UserService = Depends(get_user_service),
+@router.patch(
+    path="/users/me",
+    summary="Обновить информацию профиля",
+    tags=["users"]
+)
+def profile(user: UserBase, jwt_cache: JwtCache = Depends(), user_service: UserService = Depends(get_user_service),
             authorize: AuthJWT = Depends()) -> dict:
     try:
         authorize.jwt_required()
+        jwt_cache.is_active_access_token(authorize.get_jwt_subject(), authorize.get_raw_jwt()["jti"])
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid token")
+
     curr_user: dict = authorize.get_raw_jwt()
     data: dict = user_service.update_user(user=user, uuid=curr_user["sub"])
     user_data: UserReqInfo = UserReqInfo(**data)
@@ -110,10 +121,16 @@ def profile(user: UserBase, user_service: UserService = Depends(get_user_service
     return upd
 
 
-@router.post(path="/refresh")
-def refresh(authorize: AuthJWT = Depends(), user_service: UserService = Depends(get_user_service)) -> dict:
+@router.post(
+    path="/refresh",
+    summary="Обновить токен",
+    tags=["refresh"]
+)
+def refresh(jwt_cache: JwtCache = Depends(), authorize: AuthJWT = Depends(),
+            user_service: UserService = Depends(get_user_service)) -> dict:
     try:
         authorize.jwt_refresh_token_required()
+        jwt_cache.is_active_refresh_token(authorize.get_jwt_subject(), authorize.get_raw_jwt()["jti"])
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid token")
 
@@ -128,6 +145,43 @@ def refresh(authorize: AuthJWT = Depends(), user_service: UserService = Depends(
     access_token: str = authorize.create_access_token(subject=str(user_data.uuid), user_claims=another_claims,
                                                       expires_time=access_expire_time)
     return {"access_token": access_token, "refresh_token": refresh_token}
+
+
+@router.post(
+    path="/logout",
+    summary="Выйти из аккаунта",
+    tags=["logout"]
+)
+def logout(jwt_cache: JwtCache = Depends(), authorize: AuthJWT = Depends()) -> dict:
+    try:
+        authorize.jwt_required()
+        jwt_cache.is_active_access_token(authorize.get_jwt_subject(), authorize.get_raw_jwt()["jti"])
+    except Exception as e:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid token")
+    uuid = authorize.get_jwt_subject()
+    access_jti = authorize.get_raw_jwt()["jti"]
+    refresh_jti = authorize.get_raw_jwt()["refresh_uuid"]
+
+    jwt_cache.logout(uuid, access_jti, refresh_jti)
+    return {"msg": "You have been logged out."}
+
+
+@router.post(
+    path="/logout_all",
+    summary="Завершить все сеансы",
+    tags=["logout"]
+)
+def logout_all(jwt_cache: JwtCache = Depends(), authorize: AuthJWT = Depends()) -> dict:
+    try:
+        authorize.jwt_required()
+        jwt_cache.is_active_access_token(authorize.get_jwt_subject(), authorize.get_raw_jwt()["jti"])
+    except Exception as e:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid token")
+    uuid = authorize.get_jwt_subject()
+    access_jti = authorize.get_raw_jwt()["jti"]
+
+    jwt_cache.logout_all(uuid, access_jti)
+    return {"msg": "You have been logout from all devices."}
 
 
 def make_user_claims(user_data: UserReqInfo, refresh_uuid: str) -> dict:
