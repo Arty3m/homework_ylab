@@ -3,8 +3,8 @@ import redis
 from src.core import config
 from pydantic import BaseModel
 
-blocked_access_tokens = redis.Redis(host=config.REDIS_HOST, port=9000, db=1)
-active_refresh_tokens = redis.Redis(host=config.REDIS_HOST, port=9000, db=2)
+blocked_access_tokens = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=1)
+active_refresh_tokens = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=2)
 
 __all__ = ("JwtCache",)
 
